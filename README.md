@@ -81,7 +81,7 @@ NEW_AZURE_WEB_AGENT/
 
 ## Azure AI Foundry Setup
 
-The backend communicates with the existing `CampusPlacementAgent` using:
+The backend communicates with the existing `CampusPlacementAgent` using
 - `DefaultAzureCredential` for authentication
 - `AIProjectClient` from `@azure/ai-projects`
 
