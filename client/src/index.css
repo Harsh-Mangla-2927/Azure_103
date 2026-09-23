@@ -1,0 +1,806 @@
+@import url('https://fonts.googleapis.com/css2?family=Marcellus&family=Josefin+Sans:ital,wght@0,100..700;1,100..700&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================================
+   DESIGN TOKENS
+   ============================================================ */
+:root {
+  --background: #0A0A0A;
+  --foreground: #F2F0E4;
+  --card: #141414;
+  --gold: #D4AF37;
+  --gold-dim: #9A7D20;
+  --gold-light: #E8CC6A;
+  --midnight: #1E3D59;
+  --muted: #888888;
+  --border: #2A2A2A;
+  --border-gold: rgba(212, 175, 55, 0.3);
+  --shadow-gold: 0 0 20px rgba(212, 175, 55, 0.12);
+}
+
+/* ============================================================
+   BASE RESETS
+   ============================================================ */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: 'Josefin Sans', sans-serif;
+  font-size: 14px;
+  line-height: 1.6;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+#root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ============================================================
+   ART DECO BACKGROUND
+   ============================================================ */
+.deco-bg {
+  position: relative;
+  background-color: var(--background);
+}
+
+.deco-bg::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 40px,
+      rgba(212, 175, 55, 0.018) 40px,
+      rgba(212, 175, 55, 0.018) 41px
+    ),
+    repeating-linear-gradient(
+      -45deg,
+      transparent,
+      transparent 40px,
+      rgba(212, 175, 55, 0.018) 40px,
+      rgba(212, 175, 55, 0.018) 41px
+    );
+  pointer-events: none;
+  z-index: 0;
+}
+
+.deco-bg::after {
+  content: '';
+  position: fixed;
+  top: -30%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 800px;
+  height: 800px;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(212, 175, 55, 0.04) 0%,
+    rgba(30, 61, 89, 0.03) 40%,
+    transparent 70%
+  );
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ============================================================
+   TYPOGRAPHY
+   ============================================================ */
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Marcellus', Georgia, serif;
+  font-weight: 400;
+  letter-spacing: 0.05em;
+  line-height: 1.2;
+}
+
+.heading-display {
+  font-family: 'Marcellus', Georgia, serif;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  line-height: 1.1;
+}
+
+.heading-xl {
+  font-family: 'Marcellus', Georgia, serif;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  font-size: clamp(1.5rem, 3vw, 2rem);
+}
+
+.heading-lg {
+  font-family: 'Marcellus', Georgia, serif;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 1.25rem;
+}
+
+.heading-sm {
+  font-family: 'Marcellus', Georgia, serif;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  font-size: 0.875rem;
+}
+
+.label-deco {
+  font-family: 'Josefin Sans', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  font-size: 0.625rem;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+/* ============================================================
+   ART DECO CARD
+   ============================================================ */
+.deco-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  position: relative;
+  transition: border-color 300ms ease, box-shadow 300ms ease;
+}
+
+.deco-card:hover {
+  border-color: var(--border-gold);
+  box-shadow: var(--shadow-gold);
+}
+
+.deco-card--active {
+  border-color: var(--border-gold);
+  box-shadow: var(--shadow-gold);
+}
+
+/* Corner decorations */
+.deco-corners {
+  position: relative;
+}
+
+.deco-corners::before,
+.deco-corners::after {
+  content: '';
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border-color: var(--gold);
+  border-style: solid;
+  opacity: 0.6;
+}
+
+.deco-corners::before {
+  top: -1px;
+  left: -1px;
+  border-width: 1px 0 0 1px;
+}
+
+.deco-corners::after {
+  bottom: -1px;
+  right: -1px;
+  border-width: 0 1px 1px 0;
+}
+
+/* ============================================================
+   BUTTONS
+   ============================================================ */
+.btn-gold {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: transparent;
+  border: 1px solid var(--gold);
+  color: var(--gold);
+  font-family: 'Josefin Sans', sans-serif;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  padding: 0.625rem 1.5rem;
+  cursor: pointer;
+  transition: all 300ms ease;
+  position: relative;
+  overflow: hidden;
+  min-height: 44px;
+  white-space: nowrap;
+}
+
+.btn-gold::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--gold);
+  transform: translateX(-101%);
+  transition: transform 300ms ease;
+  z-index: -1;
+}
+
+.btn-gold:hover::before {
+  transform: translateX(0);
+}
+
+.btn-gold:hover {
+  color: var(--background);
+}
+
+.btn-gold:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+
+.btn-gold:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.btn-gold:disabled::before {
+  display: none;
+}
+
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  font-family: 'Josefin Sans', sans-serif;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  padding: 0.625rem 1.25rem;
+  cursor: pointer;
+  transition: all 300ms ease;
+  min-height: 44px;
+}
+
+.btn-ghost:hover {
+  border-color: var(--border-gold);
+  color: var(--foreground);
+}
+
+.btn-ghost:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+
+.btn-danger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: transparent;
+  border: 1px solid #8B1A1A;
+  color: #CF6679;
+  font-family: 'Josefin Sans', sans-serif;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  padding: 0.625rem 1.25rem;
+  cursor: pointer;
+  transition: all 300ms ease;
+  min-height: 44px;
+}
+
+.btn-danger:hover {
+  background: rgba(139, 26, 26, 0.2);
+}
+
+/* ============================================================
+   FORM ELEMENTS
+   ============================================================ */
+.input-deco {
+  width: 100%;
+  background: rgba(20, 20, 20, 0.8);
+  border: 1px solid var(--border);
+  color: var(--foreground);
+  font-family: 'Josefin Sans', sans-serif;
+  font-size: 0.875rem;
+  padding: 0.75rem 1rem;
+  transition: border-color 200ms ease, box-shadow 200ms ease;
+  outline: none;
+  border-radius: 0;
+  min-height: 44px;
+}
+
+.input-deco::placeholder {
+  color: var(--muted);
+  opacity: 0.7;
+}
+
+.input-deco:focus {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 1px rgba(212, 175, 55, 0.15);
+}
+
+.input-deco:focus-visible {
+  outline: none;
+}
+
+select.input-deco {
+  appearance: none;
+  cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23888' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  padding-right: 2.5rem;
+}
+
+.input-label {
+  display: block;
+  font-family: 'Josefin Sans', sans-serif;
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--muted);
+  margin-bottom: 0.4rem;
+}
+
+.input-error {
+  font-size: 0.75rem;
+  color: #CF6679;
+  margin-top: 0.25rem;
+}
+
+/* ============================================================
+   GOLD DIVIDER
+   ============================================================ */
+.gold-divider {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin: 0.5rem 0;
+}
+
+.gold-divider::before,
+.gold-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(to right, transparent, var(--gold), transparent);
+  opacity: 0.4;
+}
+
+.gold-line {
+  height: 1px;
+  background: linear-gradient(to right, transparent, rgba(212,175,55,0.5), transparent);
+}
+
+/* ============================================================
+   DIAMOND ICON
+   ============================================================ */
+.diamond-icon {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform: rotate(45deg);
+  border: 1px solid var(--gold);
+  background: rgba(212, 175, 55, 0.05);
+  flex-shrink: 0;
+}
+
+.diamond-icon > * {
+  transform: rotate(-45deg);
+}
+
+.diamond-icon-sm {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform: rotate(45deg);
+  border: 1px solid rgba(212, 175, 55, 0.4);
+  background: rgba(212, 175, 55, 0.05);
+  flex-shrink: 0;
+}
+
+.diamond-icon-sm > * {
+  transform: rotate(-45deg);
+}
+
+/* ============================================================
+   SIDEBAR
+   ============================================================ */
+.sidebar {
+  width: 220px;
+  min-height: 100vh;
+  background: var(--card);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 50;
+  transition: width 300ms ease, transform 300ms ease;
+}
+
+.sidebar.collapsed {
+  width: 60px;
+}
+
+.sidebar-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.625rem 1rem;
+  color: var(--muted);
+  font-family: 'Josefin Sans', sans-serif;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  cursor: pointer;
+  transition: all 200ms ease;
+  border-left: 2px solid transparent;
+  text-decoration: none;
+  white-space: nowrap;
+  overflow: hidden;
+  min-height: 44px;
+  border-radius: 0;
+}
+
+.sidebar-nav-item:hover {
+  color: var(--foreground);
+  background: rgba(212, 175, 55, 0.05);
+  border-left-color: rgba(212, 175, 55, 0.3);
+}
+
+.sidebar-nav-item.active {
+  color: var(--gold);
+  background: rgba(212, 175, 55, 0.08);
+  border-left-color: var(--gold);
+}
+
+.sidebar-nav-item svg {
+  flex-shrink: 0;
+}
+
+/* ============================================================
+   SCROLLBAR
+   ============================================================ */
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--background);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 0;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--muted-dark);
+}
+
+/* ============================================================
+   STATUS BADGES
+   ============================================================ */
+.badge-gold {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  background: rgba(212, 175, 55, 0.12);
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  color: var(--gold);
+  font-family: 'Josefin Sans', sans-serif;
+  font-size: 0.6rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  padding: 0.2rem 0.6rem;
+}
+
+.badge-green {
+  background: rgba(26, 92, 46, 0.2);
+  border: 1px solid rgba(26, 92, 46, 0.5);
+  color: #4CAF7A;
+  font-family: 'Josefin Sans', sans-serif;
+  font-size: 0.6rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  padding: 0.2rem 0.6rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.badge-red {
+  background: rgba(139, 26, 26, 0.2);
+  border: 1px solid rgba(139, 26, 26, 0.5);
+  color: #CF6679;
+  font-family: 'Josefin Sans', sans-serif;
+  font-size: 0.6rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  padding: 0.2rem 0.6rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.badge-blue {
+  background: rgba(30, 61, 89, 0.3);
+  border: 1px solid rgba(30, 61, 89, 0.6);
+  color: #7BAFD4;
+  font-family: 'Josefin Sans', sans-serif;
+  font-size: 0.6rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  padding: 0.2rem 0.6rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.badge-muted {
+  background: rgba(136, 136, 136, 0.1);
+  border: 1px solid rgba(136, 136, 136, 0.3);
+  color: var(--muted);
+  font-family: 'Josefin Sans', sans-serif;
+  font-size: 0.6rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  padding: 0.2rem 0.6rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+/* ============================================================
+   METRIC CARD
+   ============================================================ */
+.metric-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  padding: 1rem 1.25rem;
+  position: relative;
+  transition: border-color 300ms, box-shadow 300ms;
+}
+
+.metric-card:hover {
+  border-color: var(--border-gold);
+  box-shadow: var(--shadow-gold);
+}
+
+.metric-value {
+  font-family: 'Marcellus', Georgia, serif;
+  font-size: 1.75rem;
+  color: var(--gold);
+  line-height: 1;
+}
+
+.metric-label {
+  font-family: 'Josefin Sans', sans-serif;
+  font-size: 0.6rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--muted);
+  margin-top: 0.25rem;
+}
+
+/* ============================================================
+   PROGRESS BAR
+   ============================================================ */
+.progress-deco {
+  height: 2px;
+  background: var(--border);
+  position: relative;
+  overflow: visible;
+}
+
+.progress-deco-fill {
+  height: 100%;
+  background: linear-gradient(to right, var(--gold-dim), var(--gold));
+  transition: width 600ms ease;
+  position: relative;
+}
+
+.progress-deco-fill::after {
+  content: '';
+  position: absolute;
+  right: -1px;
+  top: -3px;
+  width: 8px;
+  height: 8px;
+  background: var(--gold);
+  transform: rotate(45deg);
+}
+
+/* ============================================================
+   CHAT BUBBLES
+   ============================================================ */
+.chat-bubble-user {
+  background: rgba(212, 175, 55, 0.08);
+  border: 1px solid rgba(212, 175, 55, 0.2);
+  padding: 0.875rem 1.125rem;
+  max-width: 80%;
+  align-self: flex-end;
+}
+
+.chat-bubble-assistant {
+  background: var(--card);
+  border: 1px solid var(--border);
+  padding: 0.875rem 1.125rem;
+  max-width: 85%;
+  align-self: flex-start;
+}
+
+/* ============================================================
+   ROMAN NUMERAL PHASES
+   ============================================================ */
+.phase-number {
+  font-family: 'Marcellus', Georgia, serif;
+  font-size: 0.75rem;
+  color: var(--gold);
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  opacity: 0.8;
+}
+
+/* ============================================================
+   UPLOAD DROP ZONE
+   ============================================================ */
+.drop-zone {
+  border: 1px dashed rgba(212, 175, 55, 0.3);
+  background: rgba(20, 20, 20, 0.5);
+  transition: all 300ms ease;
+  cursor: pointer;
+}
+
+.drop-zone:hover,
+.drop-zone.drag-over {
+  border-color: var(--gold);
+  background: rgba(212, 175, 55, 0.04);
+  box-shadow: var(--shadow-gold);
+}
+
+/* ============================================================
+   MOBILE DRAWER
+   ============================================================ */
+.mobile-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 40;
+  backdrop-filter: blur(2px);
+}
+
+/* ============================================================
+   ANIMATIONS
+   ============================================================ */
+.animate-fade-in {
+  animation: fadeIn 0.4s ease-out both;
+}
+
+.animate-slide-up {
+  animation: slideUp 0.4s ease-out both;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(-16px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+/* ============================================================
+   MARKDOWN PROSE RESET (for AI responses)
+   ============================================================ */
+.prose-deco {
+  color: var(--foreground);
+  font-family: 'Josefin Sans', sans-serif;
+  font-size: 0.875rem;
+  line-height: 1.7;
+}
+
+.prose-deco h1, .prose-deco h2, .prose-deco h3, .prose-deco h4 {
+  font-family: 'Marcellus', Georgia, serif;
+  color: var(--gold);
+  margin-top: 1.25rem;
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.prose-deco h1 { font-size: 1.1rem; }
+.prose-deco h2 { font-size: 1rem; }
+.prose-deco h3 { font-size: 0.9rem; }
+
+.prose-deco p { margin-bottom: 0.75rem; }
+
+.prose-deco ul, .prose-deco ol {
+  padding-left: 1.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.prose-deco li { margin-bottom: 0.25rem; }
+
+.prose-deco strong {
+  color: var(--foreground);
+  font-weight: 700;
+}
+
+.prose-deco em { color: var(--gold-light); }
+
+.prose-deco code {
+  background: rgba(212, 175, 55, 0.08);
+  border: 1px solid rgba(212, 175, 55, 0.2);
+  padding: 0.1em 0.4em;
+  font-size: 0.8em;
+}
+
+.prose-deco hr {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 1rem 0;
+}
+
+/* ============================================================
+   UTILITY
+   ============================================================ */
+.text-gold { color: var(--gold); }
+.text-muted { color: var(--muted); }
+.text-foreground { color: var(--foreground); }
+.bg-card { background-color: var(--card); }
+
+.border-gold-dim { border-color: var(--border-gold); }
+
+.truncate-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Focus visible global */
+*:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+
+/* Smooth scrolling in scrollable containers */
+.overflow-y-auto {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) var(--background);
+}
