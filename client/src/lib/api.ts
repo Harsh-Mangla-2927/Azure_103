@@ -75,20 +75,8 @@ export const api = {
     /** Forgot password step 2 — verify OTP + set new password. Returns JWT (auto-login). */
     resetPassword: (payload: { email: string; otp: string; newPassword: string }) =>
       request<{ message: string; token: string; user: { id: number; email: string; fullName: string }; onboardingCompleted: boolean }>('POST', '/auth/reset-password', payload),
-    /** Send OTP to mobile phone for SMS verification (authenticated) */
-    sendPhoneOtp: (phoneNumber: string) =>
-      request<{ message: string; maskedPhone: string }>('POST', '/auth/send-phone-otp', { phoneNumber }),
-
-    /** Verify phone OTP code (authenticated) */
-    verifyPhoneOtp: (otp: string) =>
-      request<{ message: string; phoneVerified: boolean }>('POST', '/auth/verify-phone-otp', { otp }),
-
-    /** Resend phone OTP (authenticated) */
-    resendPhoneOtp: () =>
-      request<{ message: string; maskedPhone: string }>('POST', '/auth/resend-phone-otp'),
-
     logout: () => request<{ message: string }>('POST', '/auth/logout'),
-    me: () => request<{ user: { id: number; email: string; fullName: string; personalEmail?: string; personalEmailVerified?: boolean; phoneNumber?: string; phoneVerified?: boolean }; onboardingCompleted: boolean }>('GET', '/auth/me'),
+    me: () => request<{ user: { id: number; email: string; fullName: string; personalEmail?: string; personalEmailVerified?: boolean }; onboardingCompleted: boolean }>('GET', '/auth/me'),
     approvedDomains: () => request<{ domains: string[] }>('GET', '/auth/approved-domains'),
   },
 

@@ -10,7 +10,7 @@ router.get('/', authenticateToken, (req: AuthenticatedRequest, res: Response): v
     const db = getDatabase();
     const userId = req.userId!;
 
-    const user = db.prepare('SELECT id, email, full_name, phone_number, phone_verified FROM users WHERE id = ?').get(userId) as any;
+    const user = db.prepare('SELECT id, email, full_name FROM users WHERE id = ?').get(userId) as any;
     const profile = db.prepare('SELECT * FROM profiles WHERE user_id = ?').get(userId) as any;
     const skills = db.prepare('SELECT * FROM skills WHERE user_id = ? ORDER BY category, name').all(userId) as any[];
     const projects = db.prepare('SELECT * FROM projects WHERE user_id = ? ORDER BY created_at DESC').all(userId) as any[];
@@ -21,8 +21,6 @@ router.get('/', authenticateToken, (req: AuthenticatedRequest, res: Response): v
         id: user.id,
         email: user.email,
         fullName: user.full_name,
-        phoneNumber: user.phone_number || null,
-        phoneVerified: user.phone_verified === 1,
       },
       profile: profile || {},
       skills,

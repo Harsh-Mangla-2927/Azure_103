@@ -1,22 +1,22 @@
-/**
- * Authentication Routes — Educational Email + Password + OTP Flow
+﻿/**
+ * Authentication Routes â€” Educational Email + Password + OTP Flow
  *
  * FLOW:
  *   Login:    POST /send-otp { email, password, purpose:'login' }
- *             → validates password → sends OTP → frontend goes to OTP step
+ *             â†’ validates password â†’ sends OTP â†’ frontend goes to OTP step
  *
  *   Register: POST /send-otp { email, fullName, password, purpose:'register' }
- *             → hashes password → stores user → sends OTP → frontend goes to OTP step
+ *             â†’ hashes password â†’ stores user â†’ sends OTP â†’ frontend goes to OTP step
  *
  *   Verify:   POST /verify-otp { email, otp }
- *             → verifies OTP hash → issues JWT
+ *             â†’ verifies OTP hash â†’ issues JWT
  *
  * SECURITY MODEL:
  *   - Backend is the ONLY authority for educational email validation
  *   - Passwords are hashed with bcrypt (12 rounds)
  *   - OTPs are hashed with bcrypt before storage (never plaintext)
  *   - OTPs expire after 5 minutes
- *   - Max 5 wrong OTP attempts per OTP → locked
+ *   - Max 5 wrong OTP attempts per OTP â†’ locked
  *   - Rate limiting on send and verify
  *   - Personal email NEVER bypasses educational email requirement
  *   - OTP is NEVER returned in API responses
@@ -32,17 +32,11 @@ import { getDatabase } from '../db/database';
 import { generateToken, authenticateToken, AuthenticatedRequest } from '../middleware/auth';
 import { isEducationalDomain, normalizeEmail, APPROVED_DOMAINS } from '../config/educationalDomains';
 import { sendOtpEmail, sendRecoveryEmailVerification } from '../services/emailService';
-import {
-  normalizePhoneNumber,
-  isValidPhoneNumber,
-  sendSmsOtp,
-  maskPhoneNumber,
-} from '../services/smsService';
 
 
 const router = Router();
 
-// ── Rate limiters (configurable via env vars) ────────────────────────────────
+// â”€â”€ Rate limiters (configurable via env vars) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const OTP_RATE_WINDOW_MS  = parseInt(process.env.OTP_RATE_LIMIT_WINDOW_MINUTES  || '15', 10) * 60 * 1000;
 const OTP_MAX_PER_IP      = parseInt(process.env.OTP_MAX_REQUESTS_PER_IP        || '20', 10);
@@ -68,7 +62,7 @@ const otpVerifyLimiter = rateLimit({
   message: { error: 'Too many verification attempts. Please wait a few minutes.', code: 'IP_RATE_LIMIT' },
 });
 
-// ── OTP constants (configurable via env vars) ─────────────────────────────────
+// â”€â”€ OTP constants (configurable via env vars) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const OTP_EXPIRY_MS      = parseInt(process.env.OTP_EXPIRES_MINUTES           || '5',  10) * 60 * 1000;
 const OTP_MAX_ATTEMPTS   = parseInt(process.env.OTP_MAX_VERIFY_ATTEMPTS       || '5',  10);
@@ -89,7 +83,7 @@ async function verifyOtpHash(otp: string, hash: string): Promise<boolean> {
   return bcrypt.compare(otp, hash);
 }
 
-// ── POST /api/auth/send-otp ───────────────────────────────────────────────────
+// â”€â”€ POST /api/auth/send-otp â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Combined step: validate credentials (password for login, or create user for register)
 // then generate OTP and send email.
 //
@@ -120,14 +114,14 @@ router.post(
     const purpose  = (req.body.purpose as string) || 'login';
     const fullName = (req.body.fullName as string || '').trim();
 
-    // ── 1. Normalize email ────────────────────────────────────────────────────
+    // â”€â”€ 1. Normalize email â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const email = normalizeEmail(rawEmail);
     if (!email) {
       res.status(400).json({ error: 'Invalid email format.' });
       return;
     }
 
-    // ── 2. BACKEND educational domain enforcement (security boundary) ─────────
+    // â”€â”€ 2. BACKEND educational domain enforcement (security boundary) â”€â”€â”€â”€â”€â”€â”€â”€â”€
     if (!isEducationalDomain(email)) {
       res.status(403).json({
         error: 'Please use your institutional/educational email address to continue. Personal email addresses (Gmail, Outlook, Yahoo, etc.) are not accepted.',
@@ -139,7 +133,7 @@ router.post(
     try {
       const db = getDatabase();
 
-      // ── 3. Check existing user ────────────────────────────────────────────
+      // â”€â”€ 3. Check existing user â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
       let user = db.prepare('SELECT * FROM users WHERE email = ?').get(email) as any;
 
       if (purpose === 'register') {
@@ -175,7 +169,7 @@ router.post(
         // and allow OTP to serve as the sole factor
       }
 
-      // ── 4. Resend rate-limiting (per-user, stored in DB) ──────────────────
+      // â”€â”€ 4. Resend rate-limiting (per-user, stored in DB) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
       if (user) {
         const now = Date.now();
         const lastSent = user.otp_last_sent_at ? new Date(user.otp_last_sent_at).getTime() : 0;
@@ -197,7 +191,7 @@ router.post(
         }
       }
 
-      // ── 5. Generate and hash OTP ──────────────────────────────────────────
+      // â”€â”€ 5. Generate and hash OTP â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
       const otp    = generateOtp();
       const hash   = await hashOtp(otp);
       const expiry = new Date(Date.now() + OTP_EXPIRY_MS).toISOString();
@@ -229,7 +223,7 @@ router.post(
         ).run(hash, expiry, now, newCount, newWindow, now, email);
       }
 
-      // ── 6. Send OTP email ─────────────────────────────────────────────────
+      // â”€â”€ 6. Send OTP email â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
       console.info(`[OTP] Request for ${email.replace(/(.{2}).*(@.*)/, '$1***$2')} (purpose: ${purpose})`);
 
       try {
@@ -247,7 +241,7 @@ router.post(
         }
 
         if (emailErr?.message === 'EMAIL_NOT_CONFIGURED') {
-          console.error('[OTP] Email not configured — set SMTP_HOST, SMTP_USER, SMTP_PASSWORD in server/.env');
+          console.error('[OTP] Email not configured â€” set SMTP_HOST, SMTP_USER, SMTP_PASSWORD in server/.env');
           res.status(503).json({
             error: 'Email service is not configured. Please contact the administrator.',
             code: 'EMAIL_NOT_CONFIGURED',
@@ -275,7 +269,7 @@ router.post(
   }
 );
 
-// ── POST /api/auth/resend-otp ─────────────────────────────────────────────────
+// â”€â”€ POST /api/auth/resend-otp â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Resend OTP for an already-verified email/password (no password re-check needed,
 // just email to resend to).  Used by the OTP step "Resend" button.
 
@@ -370,8 +364,8 @@ router.post(
   }
 );
 
-// ── POST /api/auth/verify-otp ─────────────────────────────────────────────────
-// Step 3: User submits OTP → verify → issue JWT
+// â”€â”€ POST /api/auth/verify-otp â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// Step 3: User submits OTP â†’ verify â†’ issue JWT
 
 router.post(
   '/verify-otp',
@@ -407,7 +401,7 @@ router.post(
         return;
       }
 
-      // ── Attempt limit ─────────────────────────────────────────────────────
+      // â”€â”€ Attempt limit â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
       if ((user.otp_attempts || 0) >= OTP_MAX_ATTEMPTS) {
         res.status(429).json({
           error: 'Too many incorrect attempts. Please request a new OTP.',
@@ -416,13 +410,13 @@ router.post(
         return;
       }
 
-      // ── Expiry check ──────────────────────────────────────────────────────
+      // â”€â”€ Expiry check â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
       if (!user.otp_expires_at || new Date(user.otp_expires_at) < new Date()) {
         res.status(400).json({ error: 'OTP has expired. Please request a new one.', code: 'OTP_EXPIRED' });
         return;
       }
 
-      // ── Hash comparison ───────────────────────────────────────────────────
+      // â”€â”€ Hash comparison â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
       if (!user.otp_hash) {
         res.status(400).json({ error: 'No OTP found. Please request a new one.' });
         return;
@@ -444,13 +438,13 @@ router.post(
         return;
       }
 
-      // ── OTP valid — invalidate it immediately (single-use) ────────────────
+      // â”€â”€ OTP valid â€” invalidate it immediately (single-use) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
       const now = new Date().toISOString();
       db.prepare(
         'UPDATE users SET otp_hash=NULL, otp_expires_at=NULL, otp_attempts=0, updated_at=? WHERE email=?'
       ).run(now, email);
 
-      // ── Issue JWT ─────────────────────────────────────────────────────────
+      // â”€â”€ Issue JWT â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
       const profile = db.prepare('SELECT onboarding_completed FROM profiles WHERE user_id = ?').get(user.id) as any;
       const token   = generateToken(user.id, user.email);
 
@@ -467,8 +461,8 @@ router.post(
   }
 );
 
-// ── POST /api/auth/add-recovery-email ─────────────────────────────────────────
-// Authenticated: user adds personal recovery email → sends verification OTP
+// â”€â”€ POST /api/auth/add-recovery-email â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// Authenticated: user adds personal recovery email â†’ sends verification OTP
 
 router.post(
   '/add-recovery-email',
@@ -525,7 +519,7 @@ router.post(
   }
 );
 
-// ── POST /api/auth/verify-recovery-email ──────────────────────────────────────
+// â”€â”€ POST /api/auth/verify-recovery-email â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 router.post(
   '/verify-recovery-email',
@@ -576,7 +570,7 @@ router.post(
   }
 );
 
-// ── POST /api/auth/forgot-password ────────────────────────────────────────────
+// â”€â”€ POST /api/auth/forgot-password â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Step 1 of password reset: validate educational email, send OTP.
 // Does NOT require password. Reuses the OTP infrastructure.
 // { email }
@@ -677,7 +671,7 @@ router.post(
   }
 );
 
-// ── POST /api/auth/reset-password ─────────────────────────────────────────────
+// â”€â”€ POST /api/auth/reset-password â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Step 2 of password reset: verify OTP + set new password (does NOT issue JWT).
 // After success, the user must log in normally so we can confirm the new password works.
 // { email, otp, newPassword }
@@ -748,7 +742,7 @@ router.post(
         return;
       }
 
-      // OTP valid — hash new password and update
+      // OTP valid â€” hash new password and update
       const newHash = await bcrypt.hash(newPassword, 12);
       const now     = new Date().toISOString();
 
@@ -777,24 +771,24 @@ router.post(
   }
 );
 
-// ── POST /api/auth/logout ─────────────────────────────────────────────────────
+// â”€â”€ POST /api/auth/logout â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 router.post('/logout', (_req: Request, res: Response): void => {
   res.json({ message: 'Logged out successfully' });
 });
 
-// ── GET /api/auth/me ──────────────────────────────────────────────────────────
+// â”€â”€ GET /api/auth/me â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 router.get('/me', authenticateToken, (req: AuthenticatedRequest, res: Response): void => {
   try {
     const db   = getDatabase();
     const user = db.prepare(
-      'SELECT id, email, full_name, personal_email, personal_email_verified, phone_number, phone_verified FROM users WHERE id = ?'
+      'SELECT id, email, full_name, personal_email, personal_email_verified FROM users WHERE id = ?'
     ).get(req.userId) as any;
 
     if (!user) { res.status(404).json({ error: 'User not found' }); return; }
 
-    // Enforce educational email — reject sessions from personal-email accounts
+    // Enforce educational email â€” reject sessions from personal-email accounts
     if (!isEducationalDomain(user.email)) {
       res.status(403).json({ error: 'Account not authorized. Please use an institutional email.', code: 'NOT_EDUCATIONAL_EMAIL' });
       return;
@@ -809,8 +803,6 @@ router.get('/me', authenticateToken, (req: AuthenticatedRequest, res: Response):
         fullName: user.full_name,
         personalEmail: user.personal_email || null,
         personalEmailVerified: user.personal_email_verified === 1,
-        phoneNumber: user.phone_number || null,
-        phoneVerified: user.phone_verified === 1,
       },
       onboardingCompleted: profile?.onboarding_completed === 1,
     });
@@ -821,341 +813,13 @@ router.get('/me', authenticateToken, (req: AuthenticatedRequest, res: Response):
   }
 });
 
-// /dev-otp endpoint has been removed — OTPs are never returned via API
+// /dev-otp endpoint has been removed â€” OTPs are never returned via API
 
-// ── GET /api/auth/approved-domains ────────────────────────────────────────────
+// â”€â”€ GET /api/auth/approved-domains â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Public: returns the list of approved domains for frontend display (not security)
 
 router.get('/approved-domains', (_req: Request, res: Response): void => {
   res.json({ domains: [...APPROVED_DOMAINS].sort() });
 });
 
-// ────────────────────────────────────────────────────────────────────────────
-// PHONE OTP — Rate-limit constants
-// SMS is more expensive and abuse-prone than email; use tighter limits.
-// ────────────────────────────────────────────────────────────────────────────
-
-const PHONE_OTP_EXPIRY_MS         = parseInt(process.env.OTP_EXPIRES_MINUTES          || '5',  10) * 60 * 1000;
-const PHONE_OTP_MAX_ATTEMPTS      = parseInt(process.env.OTP_MAX_VERIFY_ATTEMPTS      || '5',  10);
-const PHONE_RESEND_COOLDOWN_MS    = parseInt(process.env.SMS_RESEND_COOLDOWN_SECONDS  || '60', 10) * 1000; // 60s default (stricter than email)
-const PHONE_RESEND_WINDOW_MS      = parseInt(process.env.OTP_RATE_LIMIT_WINDOW_MINUTES || '15', 10) * 60 * 1000;
-const PHONE_RESEND_WINDOW_MAX     = parseInt(process.env.SMS_MAX_REQUESTS_PER_PHONE   || '3',  10); // max 3 SMS per 15 min window
-
-/** IP-level rate limiter for SMS endpoints (tighter than email) */
-const smsOtpSendLimiter = rateLimit({
-  windowMs: OTP_RATE_WINDOW_MS,
-  max: Math.floor(OTP_MAX_PER_IP / 2),  // half of email limit — SMS is more expensive
-  standardHeaders: true,
-  legacyHeaders: false,
-  message: { error: 'Too many SMS requests. Please wait a few minutes.', code: 'IP_RATE_LIMIT' },
-});
-
-// ── POST /api/auth/send-phone-otp ─────────────────────────────────────────────
-// Authenticated (JWT required). Sends an OTP to the provided phone number.
-// The email OTP must already have been verified (JWT proves email is verified).
-
-router.post(
-  '/send-phone-otp',
-  authenticateToken,
-  smsOtpSendLimiter,
-  [
-    body('phoneNumber').notEmpty().withMessage('Phone number is required'),
-  ],
-  async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      res.status(400).json({ error: errors.array()[0].msg });
-      return;
-    }
-
-    const rawPhone = req.body.phoneNumber as string;
-    const userId   = req.userId!;
-
-    // ── Normalize & validate phone number ────────────────────────────────────
-    const normalized = normalizePhoneNumber(rawPhone);
-    if (!normalized || !isValidPhoneNumber(normalized)) {
-      res.status(400).json({ error: 'Invalid phone number. Please enter a valid mobile number (e.g. +91 9876543210).' });
-      return;
-    }
-
-    try {
-      const db   = getDatabase();
-      const user = db.prepare('SELECT * FROM users WHERE id = ?').get(userId) as any;
-      if (!user) {
-        res.status(404).json({ error: 'User not found.' });
-        return;
-      }
-
-      const now = Date.now();
-
-      // ── Per-user resend rate-limit ──────────────────────────────────────────
-      const lastSent    = user.phone_otp_last_sent_at ? new Date(user.phone_otp_last_sent_at).getTime() : 0;
-      const windowStart = user.phone_otp_send_window_start ? new Date(user.phone_otp_send_window_start).getTime() : 0;
-      const sendCount   = user.phone_otp_send_count || 0;
-
-      if (now - lastSent < PHONE_RESEND_COOLDOWN_MS) {
-        const waitSecs = Math.ceil((PHONE_RESEND_COOLDOWN_MS - (now - lastSent)) / 1000);
-        res.status(429).json({
-          error: `Please wait ${waitSecs} seconds before requesting another SMS OTP.`,
-          code: 'SMS_RESEND_COOLDOWN',
-          waitSeconds: waitSecs,
-        });
-        return;
-      }
-
-      const inWindow = now - windowStart < PHONE_RESEND_WINDOW_MS;
-      if (inWindow && sendCount >= PHONE_RESEND_WINDOW_MAX) {
-        res.status(429).json({
-          error: 'Too many SMS verification requests. Please try again in 15 minutes.',
-          code: 'SMS_RATE_LIMIT',
-        });
-        return;
-      }
-
-      // ── If phone number changed, invalidate previous OTP ──────────────────
-      const phoneChanged = user.phone_number && user.phone_number !== normalized;
-      if (phoneChanged) {
-        console.info(`[SMS] Phone number changed for user ${userId} — previous OTP invalidated`);
-      }
-
-      // ── Generate & hash OTP (never stored plaintext) ──────────────────────
-      const otp    = generateOtp();
-      const hash   = await hashOtp(otp);
-      const expiry = new Date(now + PHONE_OTP_EXPIRY_MS).toISOString();
-      const ts     = new Date(now).toISOString();
-
-      // ── Send SMS FIRST — only write rate-limit counters on success ─────────
-      // IMPORTANT: We deliberately send the SMS before updating the DB.
-      // If we wrote phone_otp_last_sent_at to DB before calling the provider
-      // and the provider failed (e.g. not configured, network error), the user
-      // would be stuck in a 60-second cooldown without ever receiving an SMS.
-      // By sending first, a failed delivery leaves rate-limit fields untouched,
-      // allowing the user to correct their number or retry immediately.
-      const result = await sendSmsOtp(normalized, otp);
-
-      if (!result.success) {
-        console.error(`[SMS] SMS_PROVIDER_FAILED for user ${userId}: ${result.error}`);
-        res.status(503).json({
-          error: result.error || "We couldn't send the verification code right now. Please try again.",
-          code: 'SMS_DELIVERY_FAILED',
-        });
-        return;
-      }
-
-      // ── SMS delivered — now commit OTP hash + rate-limit to DB ────────────
-      const newCount  = inWindow && !phoneChanged ? sendCount + 1 : 1;
-      const newWindow = (inWindow && !phoneChanged) ? user.phone_otp_send_window_start : ts;
-
-      db.prepare(`
-        UPDATE users SET
-          phone_number = ?,
-          phone_verified = 0,
-          phone_otp_hash = ?,
-          phone_otp_expires_at = ?,
-          phone_otp_attempts = 0,
-          phone_otp_last_sent_at = ?,
-          phone_otp_send_count = ?,
-          phone_otp_send_window_start = ?,
-          updated_at = ?
-        WHERE id = ?
-      `).run(normalized, hash, expiry, ts, newCount, newWindow, ts, userId);
-
-      console.info(`[SMS] SMS_OTP_PROVIDER_ACCEPTED for user ${userId} → ${maskPhoneNumber(normalized)}`);
-
-      res.json({
-        message: 'Verification code sent to your mobile number.',
-        maskedPhone: maskPhoneNumber(normalized),
-      });
-    } catch (error) {
-      console.error('[SMS] Unexpected error in send-phone-otp:', (error as any)?.message?.slice(0, 100));
-      res.status(500).json({ error: 'Something went wrong. Please try again.' });
-    }
-  }
-);
-
-
-// ── POST /api/auth/verify-phone-otp ──────────────────────────────────────────
-// Authenticated. Verifies the SMS OTP and marks the phone as verified in the DB.
-// The backend is the SOLE authority — frontend cannot self-declare phone verified.
-
-router.post(
-  '/verify-phone-otp',
-  authenticateToken,
-  otpVerifyLimiter,
-  [
-    body('otp').isLength({ min: 6, max: 6 }).isNumeric().withMessage('OTP must be 6 digits'),
-  ],
-  async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      res.status(400).json({ error: errors.array()[0].msg });
-      return;
-    }
-
-    const otp    = (req.body.otp as string).trim();
-    const userId = req.userId!;
-
-    try {
-      const db   = getDatabase();
-      const user = db.prepare('SELECT * FROM users WHERE id = ?').get(userId) as any;
-
-      if (!user) {
-        res.status(404).json({ error: 'User not found.' });
-        return;
-      }
-
-      if (!user.phone_number || !user.phone_otp_hash) {
-        res.status(400).json({ error: 'No phone verification in progress. Please request an OTP first.' });
-        return;
-      }
-
-      // ── Attempt limit ──────────────────────────────────────────────────────
-      if ((user.phone_otp_attempts || 0) >= PHONE_OTP_MAX_ATTEMPTS) {
-        res.status(429).json({
-          error: 'Too many incorrect attempts. Please request a new SMS OTP.',
-          code: 'OTP_LOCKED',
-        });
-        return;
-      }
-
-      // ── Expiry check ───────────────────────────────────────────────────────
-      if (!user.phone_otp_expires_at || new Date(user.phone_otp_expires_at) < new Date()) {
-        res.status(400).json({
-          error: 'This verification code has expired. Please request a new code.',
-          code: 'OTP_EXPIRED',
-        });
-        return;
-      }
-
-      // ── Hash comparison ────────────────────────────────────────────────────
-      const valid = await verifyOtpHash(otp, user.phone_otp_hash);
-
-      if (!valid) {
-        db.prepare('UPDATE users SET phone_otp_attempts = phone_otp_attempts + 1 WHERE id = ?').run(userId);
-        const remaining = PHONE_OTP_MAX_ATTEMPTS - (user.phone_otp_attempts + 1);
-        res.status(400).json({
-          error: remaining > 0
-            ? `Incorrect verification code. ${remaining} attempt${remaining === 1 ? '' : 's'} remaining.`
-            : 'Too many incorrect attempts. Please request a new SMS OTP.',
-          code: 'OTP_WRONG',
-          attemptsRemaining: Math.max(0, remaining),
-        });
-        return;
-      }
-
-      // ── OTP valid — mark phone verified, invalidate OTP immediately ────────
-      const now = new Date().toISOString();
-      db.prepare(`
-        UPDATE users SET
-          phone_verified = 1,
-          phone_verified_at = ?,
-          phone_otp_hash = NULL,
-          phone_otp_expires_at = NULL,
-          phone_otp_attempts = 0,
-          updated_at = ?
-        WHERE id = ?
-      `).run(now, now, userId);
-
-      console.info(`[SMS] SMS_OTP_VERIFIED for user ${userId} → ${maskPhoneNumber(user.phone_number)}`);
-
-      res.json({
-        message: 'Phone number verified successfully.',
-        phoneVerified: true,
-      });
-    } catch (error) {
-      console.error('[SMS] Unexpected error in verify-phone-otp:', (error as any)?.message?.slice(0, 100));
-      res.status(500).json({ error: 'Verification failed. Please try again.' });
-    }
-  }
-);
-
-// ── POST /api/auth/resend-phone-otp ──────────────────────────────────────────
-// Authenticated. Resends SMS OTP to the already-submitted phone number.
-
-router.post(
-  '/resend-phone-otp',
-  authenticateToken,
-  smsOtpSendLimiter,
-  async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-    const userId = req.userId!;
-
-    try {
-      const db   = getDatabase();
-      const user = db.prepare('SELECT * FROM users WHERE id = ?').get(userId) as any;
-
-      if (!user || !user.phone_number) {
-        res.status(400).json({ error: 'No phone number on file. Please enter your phone number first.' });
-        return;
-      }
-
-      const now       = Date.now();
-      const lastSent  = user.phone_otp_last_sent_at ? new Date(user.phone_otp_last_sent_at).getTime() : 0;
-      const windowStart = user.phone_otp_send_window_start ? new Date(user.phone_otp_send_window_start).getTime() : 0;
-      const sendCount = user.phone_otp_send_count || 0;
-
-      if (now - lastSent < PHONE_RESEND_COOLDOWN_MS) {
-        const waitSecs = Math.ceil((PHONE_RESEND_COOLDOWN_MS - (now - lastSent)) / 1000);
-        res.status(429).json({
-          error: `Please wait ${waitSecs} seconds before requesting another SMS OTP.`,
-          code: 'SMS_RESEND_COOLDOWN',
-          waitSeconds: waitSecs,
-        });
-        return;
-      }
-
-      const inWindow = now - windowStart < PHONE_RESEND_WINDOW_MS;
-      if (inWindow && sendCount >= PHONE_RESEND_WINDOW_MAX) {
-        res.status(429).json({
-          error: 'Too many SMS verification requests. Please try again in 15 minutes.',
-          code: 'SMS_RATE_LIMIT',
-        });
-        return;
-      }
-
-      const otp    = generateOtp();
-      const hash   = await hashOtp(otp);
-      const expiry = new Date(now + PHONE_OTP_EXPIRY_MS).toISOString();
-      const ts     = new Date(now).toISOString();
-      const newCount  = inWindow ? sendCount + 1 : 1;
-      const newWindow = inWindow ? user.phone_otp_send_window_start : ts;
-
-      // Send SMS FIRST — only commit rate-limit counters to DB on success.
-      // Same logic as send-phone-otp: a failed delivery must not start cooldown.
-      const result = await sendSmsOtp(user.phone_number, otp);
-
-      if (!result.success) {
-        res.status(503).json({
-          error: result.error || "We couldn't send the verification code right now. Please try again.",
-          code: 'SMS_DELIVERY_FAILED',
-        });
-        return;
-      }
-
-      // SMS delivered — now persist OTP hash + rate-limit counters
-      db.prepare(`
-        UPDATE users SET
-          phone_otp_hash = ?,
-          phone_otp_expires_at = ?,
-          phone_otp_attempts = 0,
-          phone_otp_last_sent_at = ?,
-          phone_otp_send_count = ?,
-          phone_otp_send_window_start = ?,
-          updated_at = ?
-        WHERE id = ?
-      `).run(hash, expiry, ts, newCount, newWindow, ts, userId);
-
-      console.info(`[SMS] SMS_OTP_RESENT for user ${userId} → ${maskPhoneNumber(user.phone_number)}`);
-
-      res.json({
-        message: 'Verification code resent.',
-        maskedPhone: maskPhoneNumber(user.phone_number),
-      });
-    } catch (error) {
-      console.error('[SMS] Unexpected error in resend-phone-otp:', (error as any)?.message?.slice(0, 100));
-      res.status(500).json({ error: 'Something went wrong. Please try again.' });
-    }
-  }
-);
-
 export default router;
-
