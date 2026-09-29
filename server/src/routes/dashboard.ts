@@ -4,7 +4,6 @@ import { authenticateToken, AuthenticatedRequest } from '../middleware/auth';
 
 const router = Router();
 
-// GET /api/dashboard
 router.get('/', authenticateToken, (req: AuthenticatedRequest, res: Response): void => {
   try {
     const db = getDatabase();
@@ -24,7 +23,6 @@ router.get('/', authenticateToken, (req: AuthenticatedRequest, res: Response): v
       LIMIT 5
     `).all(userId) as any[];
 
-    // Calculate profile completion
     let completionScore = 0;
     const checks = [
       user?.full_name,
@@ -43,9 +41,8 @@ router.get('/', authenticateToken, (req: AuthenticatedRequest, res: Response): v
     ];
     completionScore = Math.round((checks.filter(Boolean).length / checks.length) * 100);
 
-    // Placement readiness: simple heuristic
     let readiness = 'Not assessed';
-    if (resume && skills.count >= 3 && profile?.cgpa) {
+    if (resume && profile?.cgpa != null) {
       readiness = profile.cgpa >= 7.5 && profile.backlogs === 0 ? 'Good' : 
                   profile.cgpa >= 6.0 ? 'Fair' : 'Needs improvement';
     }

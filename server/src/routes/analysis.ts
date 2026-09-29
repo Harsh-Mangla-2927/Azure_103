@@ -6,6 +6,7 @@ import {
   runEligibilityAnalysis,
   runSkillGapAnalysis,
   runPreparationPlan,
+  runResumeIntelligence,
   StudentProfileContext,
 } from '../services/azureAgent';
 
@@ -37,7 +38,6 @@ function buildProfileContext(userId: number): StudentProfileContext {
   };
 }
 
-// POST /api/analysis/eligibility
 router.post(
   '/eligibility',
   authenticateToken,
@@ -82,7 +82,6 @@ router.post(
   }
 );
 
-// POST /api/analysis/skill-gap
 router.post(
   '/skill-gap',
   authenticateToken,
@@ -127,7 +126,6 @@ router.post(
   }
 );
 
-// POST /api/analysis/preparation
 router.post(
   '/preparation',
   authenticateToken,
@@ -177,7 +175,6 @@ router.post(
   }
 );
 
-// GET /api/analysis/history
 router.get('/history', authenticateToken, (req: AuthenticatedRequest, res: Response): void => {
   try {
     const db = getDatabase();
@@ -195,5 +192,73 @@ router.get('/history', authenticateToken, (req: AuthenticatedRequest, res: Respo
     res.status(500).json({ error: 'Failed to load analysis history' });
   }
 });
+
+router.post(
+  '/resume-intelligence',
+  authenticateToken,
+  [
+    body('targetCompany').trim().notEmpty().withMessage('Target company is required'),
+    body('targetRole').trim().notEmpty().withMessage('Target role is required'),
+  ],
+  async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      res.status(400).json({ errors: errors.array() });
+      return;
+    }
+
+    const { targetCompany, targetRole } = req.body;
+    const userId = req.userId!;
+
+    try {
+      const db = getDatabase();
+
+      // Fetch the most recent resume text
+      const resumeRow = db.prepare(
+        'SELECT extracted_text, original_name FROM resumes WHERE user_id = ? ORDER BY upload_date DESC LIMIT 1'
+      ).get(userId) as any;
+
+      if (!resumeRow) {
+        res.status(400).json({
+          error: 'No resume found. Please upload your resume before running Resume Intelligence.',
+        });
+        return;
+      }
+
+      if (!resumeRow.extracted_text || resumeRow.extracted_text.trim().length < 50) {
+        res.status(400).json({
+          error: 'Unable to analyze this resume. The resume text could not be extracted. Please upload a readable PDF or DOCX file.',
+        });
+        return;
+      }
+
+      const profile = buildProfileContext(userId);
+      const resumeText = resumeRow.extracted_text as string;
+
+      const result = await runResumeIntelligence(profile, targetCompany, targetRole, resumeText);
+
+      // Store in analyses table (extend type via raw SQL)
+      db.prepare(`
+        INSERT INTO analyses (user_id, type, target_company, target_role, result)
+        VALUES (?, 'resume-intelligence', ?, ?, ?)
+      `).run(userId, targetCompany, targetRole, result.content);
+
+      res.json({
+        analysis: result.content,
+        targetCompany,
+        targetRole,
+        resumeName: resumeRow.original_name,
+        timestamp: new Date().toISOString(),
+      });
+    } catch (error) {
+      const err = error as Error;
+      console.error('Resume Intelligence error:', err.message);
+      res.status(503).json({
+        error: 'Unable to reach the placement intelligence service. Please try again.',
+        details: err.message,
+      });
+    }
+  }
+);
 
 export default router;

@@ -32,7 +32,6 @@ function buildProfileContext(userId: number): StudentProfileContext {
   };
 }
 
-// POST /api/chat
 router.post(
   '/',
   authenticateToken,
@@ -44,13 +43,12 @@ router.post(
       return;
     }
 
-    const { message } = req.body;
+    const { message, preferredLang } = req.body;
     const userId = req.userId!;
 
     try {
       const db = getDatabase();
 
-      // Get recent conversation history
       const history = db.prepare(`
         SELECT role, content FROM chat_messages
         WHERE user_id = ?
@@ -59,15 +57,12 @@ router.post(
       `).all(userId) as any[];
       const conversationHistory = history.reverse();
 
-      // Build profile context
       const profile = buildProfileContext(userId);
 
-      // Send to Azure agent
-      const result = await sendToAzureAgent(message, profile, conversationHistory);
+      const result = await sendToAzureAgent(message, profile, conversationHistory, preferredLang);
 
-      // Save user message
       db.prepare("INSERT INTO chat_messages (user_id, role, content) VALUES (?, 'user', ?)").run(userId, message);
-      // Save assistant response
+      
       db.prepare("INSERT INTO chat_messages (user_id, role, content) VALUES (?, 'assistant', ?)").run(userId, result.content);
 
       res.json({
@@ -85,7 +80,6 @@ router.post(
   }
 );
 
-// GET /api/chat/history
 router.get('/history', authenticateToken, (req: AuthenticatedRequest, res: Response): void => {
   try {
     const db = getDatabase();
@@ -104,7 +98,6 @@ router.get('/history', authenticateToken, (req: AuthenticatedRequest, res: Respo
   }
 });
 
-// DELETE /api/chat/history
 router.delete('/history', authenticateToken, (req: AuthenticatedRequest, res: Response): void => {
   try {
     const db = getDatabase();

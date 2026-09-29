@@ -5,7 +5,6 @@ import { authenticateToken, AuthenticatedRequest } from '../middleware/auth';
 
 const router = Router();
 
-// GET /api/profile
 router.get('/', authenticateToken, (req: AuthenticatedRequest, res: Response): void => {
   try {
     const db = getDatabase();
@@ -30,7 +29,6 @@ router.get('/', authenticateToken, (req: AuthenticatedRequest, res: Response): v
   }
 });
 
-// PUT /api/profile
 router.put('/', authenticateToken, async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   const db = getDatabase();
   const userId = req.userId!;
@@ -39,14 +37,13 @@ router.put('/', authenticateToken, async (req: AuthenticatedRequest, res: Respon
 
   try {
     const updateProfile = db.transaction(() => {
-      // Update user name if provided
+      
       if (fullName) {
         db.prepare("UPDATE users SET full_name = ?, updated_at = datetime('now') WHERE id = ?").run(fullName, userId);
       }
 
-      // Upsert profile (INSERT OR REPLACE handles missing row case)
       if (profile) {
-        // First ensure profile row exists
+        
         db.prepare(`
           INSERT OR IGNORE INTO profiles (user_id) VALUES (?)
         `).run(userId);
@@ -77,7 +74,6 @@ router.put('/', authenticateToken, async (req: AuthenticatedRequest, res: Respon
         );
       }
 
-      // Replace skills
       if (skills !== undefined) {
         db.prepare('DELETE FROM skills WHERE user_id = ?').run(userId);
         for (const skill of skills) {
@@ -89,7 +85,6 @@ router.put('/', authenticateToken, async (req: AuthenticatedRequest, res: Respon
         }
       }
 
-      // Replace projects
       if (projects !== undefined) {
         db.prepare('DELETE FROM projects WHERE user_id = ?').run(userId);
         for (const proj of projects) {
@@ -101,7 +96,6 @@ router.put('/', authenticateToken, async (req: AuthenticatedRequest, res: Respon
         }
       }
 
-      // Replace certifications
       if (certifications !== undefined) {
         db.prepare('DELETE FROM certifications WHERE user_id = ?').run(userId);
         for (const cert of certifications) {
@@ -122,8 +116,6 @@ router.put('/', authenticateToken, async (req: AuthenticatedRequest, res: Respon
   }
 });
 
-
-// POST /api/profile/complete-onboarding
 router.post('/complete-onboarding', authenticateToken, (req: AuthenticatedRequest, res: Response): void => {
   try {
     const db = getDatabase();
