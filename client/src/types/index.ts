@@ -2,8 +2,6 @@ export interface User {
   id: number;
   email: string;
   fullName: string;
-  phoneNumber?: string | null;
-  phoneVerified?: boolean;
   personalEmail?: string | null;
   personalEmailVerified?: boolean;
 }
