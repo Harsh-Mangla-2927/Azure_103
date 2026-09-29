@@ -47,11 +47,9 @@ export function PhoneVerificationCard({
       setError('Please enter a valid mobile number');
       return;
     }
-
     setLoading(true);
     setError('');
     setSuccessMsg('');
-
     try {
       const res = await api.auth.sendPhoneOtp(phone.trim());
       setMaskedPhone(res.maskedPhone);
@@ -70,7 +68,6 @@ export function PhoneVerificationCard({
     setLoading(true);
     setError('');
     setSuccessMsg('');
-
     try {
       const res = await api.auth.resendPhoneOtp();
       setCooldown(60);
@@ -88,16 +85,14 @@ export function PhoneVerificationCard({
       setError('Please enter the complete 6-digit verification code.');
       return;
     }
-
     setLoading(true);
     setError('');
     setSuccessMsg('');
-
     try {
       await api.auth.verifyPhoneOtp(otp.trim());
       setVerified(true);
       setStep('status');
-      setSuccessMsg('Mobile number verified successfully!');
+      setSuccessMsg('Mobile number verified successfully! 🎉');
       if (onVerificationSuccess) {
         onVerificationSuccess(maskedPhone);
       }
@@ -110,13 +105,14 @@ export function PhoneVerificationCard({
 
   return (
     <div className={`deco-card deco-corners ${compact ? 'p-3' : 'p-4'} space-y-3`}>
+      {/* ── Header ── */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <div className="diamond-icon-sm text-gold">
             <Smartphone size={13} />
           </div>
           <div>
-            <div className="label-deco text-[10px]">Security & Alerts</div>
+            <div className="label-deco text-[10px]">Security &amp; Alerts</div>
             <h3 className="font-heading text-xs tracking-wider text-foreground">
               MOBILE PHONE VERIFICATION
             </h3>
@@ -133,6 +129,7 @@ export function PhoneVerificationCard({
         )}
       </div>
 
+      {/* ── Error ── */}
       {error && (
         <div className="flex items-start gap-2 p-2.5 bg-red-950/40 border border-red-800/50 text-red-300 text-xs">
           <AlertCircle size={14} className="mt-0.5 flex-shrink-0 text-red-400" />
@@ -140,6 +137,7 @@ export function PhoneVerificationCard({
         </div>
       )}
 
+      {/* ── Success ── */}
       {successMsg && (
         <div className="flex items-start gap-2 p-2.5 bg-emerald-950/40 border border-emerald-800/50 text-emerald-300 text-xs">
           <CheckCircle2 size={14} className="mt-0.5 flex-shrink-0 text-emerald-400" />
@@ -147,6 +145,7 @@ export function PhoneVerificationCard({
         </div>
       )}
 
+      {/* ── STEP: status (already verified) ── */}
       {step === 'status' && verified && (
         <div className="space-y-3 pt-1">
           <div className="flex items-center justify-between p-3 bg-[#111] border border-[#222]">
@@ -171,20 +170,24 @@ export function PhoneVerificationCard({
         </div>
       )}
 
+      {/* ── STEP: enter phone number ── */}
       {step === 'input' && (
         <form onSubmit={handleSendOtp} className="space-y-3 pt-1">
           <p className="text-[11px] text-muted leading-relaxed">
-            Verify your mobile number to receive priority placement interview calls, drive updates, and 2-step verification.
+            Verify your mobile number to receive priority placement interview calls, drive updates, and 2-step verification alerts.
           </p>
+
           <div className="flex gap-2">
             <div className="relative flex-1">
               <input
+                id="phone-otp-input"
                 type="tel"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
                 placeholder="+91 98765 43210"
                 className="input-deco w-full font-mono text-xs pl-8"
                 disabled={loading}
+                autoComplete="tel"
               />
               <Phone size={12} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted" />
             </div>
@@ -203,6 +206,7 @@ export function PhoneVerificationCard({
               )}
             </button>
           </div>
+
           {verified && (
             <button
               type="button"
@@ -215,43 +219,69 @@ export function PhoneVerificationCard({
               Cancel
             </button>
           )}
+
+          {/* Dev mode notice */}
+          <div className="p-2.5 bg-amber-950/30 border border-amber-700/30 text-[10px] text-amber-300/90 leading-relaxed">
+            <span className="font-semibold text-amber-400">📋 Dev Mode Notice:</span>{' '}
+            If <span className="font-mono bg-black/30 px-0.5">SMS_OTP_DEV_MODE=true</span> is set in{' '}
+            <span className="font-mono">server/.env</span>, the OTP will print to your{' '}
+            <span className="font-semibold text-amber-200">server terminal</span> instead of being texted.
+            Check the console window where <span className="font-mono">npm run dev</span> is running —
+            look for a box labelled <span className="font-mono bg-black/30 px-0.5">OTP: xxxxxx</span>.
+          </div>
         </form>
       )}
 
+      {/* ── STEP: enter OTP code ── */}
       {step === 'otp' && (
         <form onSubmit={handleVerifyOtp} className="space-y-3 pt-1">
           <div className="text-[11px] text-muted">
-            Enter the 6-digit SMS verification code sent to <strong className="text-foreground">{maskedPhone}</strong>:
+            Enter the <span className="text-foreground font-semibold">6-digit verification code</span> sent to{' '}
+            <strong className="text-foreground font-mono">{maskedPhone}</strong>:
           </div>
+
           <div className="flex gap-2">
             <input
+              id="phone-otp-code"
               type="text"
+              inputMode="numeric"
               maxLength={6}
               value={otp}
               onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
-              placeholder="••••••"
-              className="input-deco flex-1 text-center font-mono tracking-[0.4em] text-sm font-semibold"
+              placeholder="• • • • • •"
+              className="input-deco flex-1 text-center font-mono tracking-[0.5em] text-base font-bold"
               autoFocus
+              autoComplete="one-time-code"
               disabled={loading}
             />
             <button
               type="submit"
               disabled={loading || otp.length !== 6}
-              className="btn-gold !text-xs !py-1.5 !px-4 flex items-center gap-1"
+              className="btn-gold !text-xs !py-1.5 !px-4 flex items-center gap-1.5"
             >
-              {loading ? <RefreshCw size={12} className="animate-spin" /> : 'Verify'}
+              {loading ? <RefreshCw size={12} className="animate-spin" /> : 'Verify →'}
             </button>
           </div>
 
-          <div className="flex items-center justify-between text-[11px] pt-1">
+          {/* Dev mode reminder on OTP step */}
+          <div className="p-2.5 bg-amber-950/30 border border-amber-700/30 text-[10px] text-amber-300/90 leading-relaxed">
+            <span className="font-semibold text-amber-400">💡 Where's my OTP?</span>{' '}
+            In dev mode, the OTP is printed to the{' '}
+            <span className="font-semibold text-amber-200">server terminal</span> (not your phone).
+            Look for a console box labelled{' '}
+            <span className="font-mono bg-black/30 px-0.5">OTP: xxxxxx</span> and enter those 6 digits above.
+          </div>
+
+          <div className="flex items-center justify-between pt-1">
             <button
               type="button"
               onClick={() => {
                 setStep('input');
                 setOtp('');
                 setError('');
+                setSuccessMsg('');
               }}
-              className="text-muted hover:text-foreground text-[10px]"
+              className="text-muted hover:text-foreground text-[10px] underline"
             >
               ← Change phone number
             </button>
