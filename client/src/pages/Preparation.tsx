@@ -55,7 +55,6 @@ export default function Preparation() {
 
       <SectionDivider />
 
-      {/* Input */}
       <div className="deco-card deco-corners p-4">
         <div className="label-deco mb-4">Generate Preparation Plan For</div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
@@ -81,7 +80,6 @@ export default function Preparation() {
           </div>
         </div>
 
-        {/* Phase preview */}
         <div className="flex items-center gap-1 flex-wrap mb-4">
           {PHASES.map((phase, i) => (
             <React.Fragment key={i}>

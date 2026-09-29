@@ -9,7 +9,7 @@ export function AppShell() {
 
   return (
     <div className="deco-bg flex h-screen overflow-hidden">
-      {/* Sidebar */}
+      
       <Sidebar
         collapsed={collapsed}
         onToggle={() => setCollapsed(c => !c)}
@@ -17,7 +17,6 @@ export function AppShell() {
         onMobileClose={() => setMobileOpen(false)}
       />
 
-      {/* Main content area */}
       <div
         className="flex flex-col flex-1 min-w-0 overflow-hidden transition-all duration-300"
         style={{

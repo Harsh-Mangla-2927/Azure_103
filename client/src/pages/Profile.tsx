@@ -13,14 +13,12 @@ export default function Profile() {
   const [saveError, setSaveError] = useState('');
   const [saveOk, setSaveOk] = useState(false);
 
-  // Local editable state
   const [localProfile, setLocalProfile] = useState({ ...profile });
   const [localSkills, setLocalSkills] = useState([...skills]);
   const [localProjects, setLocalProjects] = useState([...projects]);
   const [localCerts, setLocalCerts] = useState([...certifications]);
   const [fullName, setFullName] = useState(user?.fullName || '');
 
-  // Sync when data loads
   React.useEffect(() => {
     if (!loading) {
       setLocalProfile({ ...profile });
@@ -79,7 +77,7 @@ export default function Profile() {
 
   return (
     <div className="p-4 md:p-6 space-y-5 animate-fade-in">
-      {/* Header */}
+      
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
           <div className="label-deco mb-1">Your academic and career profile</div>
@@ -94,7 +92,6 @@ export default function Profile() {
         </div>
       </div>
 
-      {/* Progress bar */}
       <div className="progress-deco">
         <div className="progress-deco-fill" style={{ width: `${completion}%` }} />
       </div>
@@ -104,7 +101,7 @@ export default function Profile() {
       )}
 
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-        {/* Academic Information */}
+        
         <div className="deco-card deco-corners p-4">
           <div className="flex items-center gap-2 mb-4">
             <div className="diamond-icon-sm text-gold"><Book size={12} /></div>
@@ -140,7 +137,6 @@ export default function Profile() {
           </div>
         </div>
 
-        {/* Career Preferences */}
         <div className="deco-card deco-corners p-4">
           <div className="flex items-center gap-2 mb-4">
             <div className="diamond-icon-sm text-gold"><Target size={12} /></div>
@@ -167,7 +163,6 @@ export default function Profile() {
             </div>
           </div>
 
-          {/* Skills */}
           <SectionDivider title="Skills" className="my-4" />
           <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
             {localSkills.map((skill, i) => (
@@ -196,7 +191,6 @@ export default function Profile() {
           </button>
         </div>
 
-        {/* Projects */}
         <div className="deco-card deco-corners p-4">
           <div className="flex items-center gap-2 mb-4">
             <div className="diamond-icon-sm text-gold"><Briefcase size={12} /></div>
@@ -219,7 +213,6 @@ export default function Profile() {
           </button>
         </div>
 
-        {/* Certifications */}
         <div className="deco-card deco-corners p-4">
           <div className="flex items-center gap-2 mb-4">
             <div className="diamond-icon-sm text-gold"><Award size={12} /></div>
@@ -243,7 +236,6 @@ export default function Profile() {
         </div>
       </div>
 
-      {/* Save button (bottom) */}
       <div className="flex justify-end pt-2">
         <DecoButton onClick={handleSave} loading={saving} icon={saveOk ? <Check size={14} /> : <Save size={14} />}>
           {saveOk ? 'Profile Saved!' : 'Save All Changes'}

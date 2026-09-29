@@ -40,7 +40,6 @@ export default function Eligibility() {
 
       <SectionDivider />
 
-      {/* Input */}
       <div className="deco-card deco-corners p-4">
         <div className="label-deco mb-4">Target Position</div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
@@ -88,7 +87,6 @@ export default function Eligibility() {
         </DecoButton>
       </div>
 
-      {/* Loading */}
       {loading && (
         <div className="deco-card p-8">
           <LoadingState message="Analyzing placement requirements..." size="lg" />

@@ -4,7 +4,6 @@ import { AuthProvider, useAuth } from './hooks/useAuth';
 import { AppShell } from './components/layout/AppShell';
 import { LoadingState } from './components/ui/LoadingState';
 
-// Pages
 import Landing from './pages/Landing';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -12,6 +11,8 @@ import Onboarding from './pages/Onboarding';
 import Dashboard from './pages/Dashboard';
 import Profile from './pages/Profile';
 import Resume from './pages/Resume';
+import ResumeBuilder from './pages/ResumeBuilder';
+import ResumeIntelligence from './pages/ResumeIntelligence';
 import Eligibility from './pages/Eligibility';
 import SkillGap from './pages/SkillGap';
 import Preparation from './pages/Preparation';
@@ -57,22 +58,22 @@ function OnboardingRoute() {
 function AppRoutes() {
   return (
     <Routes>
-      {/* Public routes */}
+      
       <Route path="/" element={<PublicRoute><Landing /></PublicRoute>} />
       <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
       <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
 
-      {/* Onboarding */}
       <Route element={<OnboardingRoute />}>
         <Route path="/onboarding" element={<Onboarding />} />
       </Route>
 
-      {/* Protected app routes */}
       <Route element={<ProtectedRoute />}>
         <Route element={<AppShell />}>
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/resume" element={<Resume />} />
+          <Route path="/resume-builder" element={<ResumeBuilder />} />
+          <Route path="/resume-intelligence" element={<ResumeIntelligence />} />
           <Route path="/eligibility" element={<Eligibility />} />
           <Route path="/skill-gap" element={<SkillGap />} />
           <Route path="/preparation" element={<Preparation />} />
@@ -81,7 +82,6 @@ function AppRoutes() {
         </Route>
       </Route>
 
-      {/* Catch all */}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

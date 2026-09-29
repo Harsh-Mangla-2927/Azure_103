@@ -51,7 +51,6 @@ export default function SkillGap() {
 
       <SectionDivider />
 
-      {/* Input */}
       <div className="deco-card deco-corners p-4">
         <div className="label-deco mb-4">Analyze Skill Gap For</div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">

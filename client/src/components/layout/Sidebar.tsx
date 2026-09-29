@@ -3,7 +3,7 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, User, FileText, Target, BarChart2,
   BookOpen, MessageSquare, LogOut, Settings, ChevronLeft,
-  ChevronRight, Menu, X
+  ChevronRight, Menu, X, FileEdit, Sparkles,
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 
@@ -17,11 +17,15 @@ const navItems: NavItem[] = [
   { to: '/dashboard', icon: <LayoutDashboard size={16} />, label: 'Dashboard' },
   { to: '/profile', icon: <User size={16} />, label: 'My Profile' },
   { to: '/resume', icon: <FileText size={16} />, label: 'Resume' },
+  { to: '/resume-builder', icon: <FileEdit size={16} />, label: 'Resume Builder' },
+  { to: '/resume-intelligence', icon: <Sparkles size={16} />, label: 'Resume Intelligence' },
   { to: '/eligibility', icon: <Target size={16} />, label: 'Eligibility' },
   { to: '/skill-gap', icon: <BarChart2 size={16} />, label: 'Skill Gap' },
   { to: '/preparation', icon: <BookOpen size={16} />, label: 'Preparation' },
   { to: '/assistant', icon: <MessageSquare size={16} />, label: 'AI Assistant' },
 ];
+
+
 
 interface SidebarProps {
   collapsed: boolean;
@@ -41,7 +45,7 @@ export function Sidebar({ collapsed, onToggle, mobileOpen, onMobileClose }: Side
 
   const sidebarContent = (
     <>
-      {/* Logo */}
+      
       <div className="flex items-center justify-between px-4 py-4 border-b border-[#2A2A2A]">
         {!collapsed && (
           <div className="flex items-center gap-2 min-w-0">
@@ -60,7 +64,6 @@ export function Sidebar({ collapsed, onToggle, mobileOpen, onMobileClose }: Side
           </div>
         )}
 
-        {/* Desktop collapse toggle */}
         <button
           onClick={onToggle}
           className="hidden md:flex btn-ghost !p-1.5 !min-h-0 !border-0 text-muted hover:text-foreground ml-auto flex-shrink-0"
@@ -69,7 +72,6 @@ export function Sidebar({ collapsed, onToggle, mobileOpen, onMobileClose }: Side
           {collapsed ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
         </button>
 
-        {/* Mobile close */}
         <button
           onClick={onMobileClose}
           className="md:hidden btn-ghost !p-1.5 !min-h-0 !border-0 text-muted"
@@ -79,7 +81,6 @@ export function Sidebar({ collapsed, onToggle, mobileOpen, onMobileClose }: Side
         </button>
       </div>
 
-      {/* Navigation */}
       <nav className="flex-1 py-3 overflow-y-auto" aria-label="Main navigation">
         <div className="label-deco px-4 mb-2" style={{ display: collapsed ? 'none' : 'block' }}>
           Navigation
@@ -100,9 +101,8 @@ export function Sidebar({ collapsed, onToggle, mobileOpen, onMobileClose }: Side
         ))}
       </nav>
 
-      {/* Bottom section */}
       <div className="border-t border-[#2A2A2A]">
-        {/* User info */}
+        
         {!collapsed && user && (
           <div className="px-4 py-3 border-b border-[#2A2A2A]">
             <div className="text-foreground text-xs font-semibold truncate">{user.fullName}</div>
@@ -134,7 +134,7 @@ export function Sidebar({ collapsed, onToggle, mobileOpen, onMobileClose }: Side
 
   return (
     <>
-      {/* Desktop sidebar */}
+      
       <aside
         className={`sidebar hidden md:flex flex-col ${collapsed ? 'collapsed' : ''}`}
         aria-label="Application sidebar"
@@ -142,7 +142,6 @@ export function Sidebar({ collapsed, onToggle, mobileOpen, onMobileClose }: Side
         {sidebarContent}
       </aside>
 
-      {/* Mobile drawer */}
       {mobileOpen && (
         <div className="md:hidden">
           <div className="mobile-overlay" onClick={onMobileClose} aria-hidden="true" />

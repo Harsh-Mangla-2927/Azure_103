@@ -23,7 +23,7 @@ export function Header({ onMenuClick }: HeaderProps) {
 
   return (
     <header className="h-14 border-b border-[#2A2A2A] bg-[#0F0F0F] flex items-center px-4 gap-4 flex-shrink-0 relative z-10">
-      {/* Mobile menu */}
+      
       <button
         onClick={onMenuClick}
         className="md:hidden btn-ghost !p-2 !min-h-0 !border-0 text-muted"
@@ -32,10 +32,8 @@ export function Header({ onMenuClick }: HeaderProps) {
         <Menu size={20} />
       </button>
 
-      {/* Vertical divider */}
       <div className="hidden md:block w-px h-6 bg-[#2A2A2A]" />
 
-      {/* Page title */}
       <div className="flex items-center gap-3 min-w-0">
         <div className="min-w-0">
           <h1 className="heading-sm text-foreground text-xs leading-none truncate">{pageInfo.title}</h1>
@@ -45,7 +43,6 @@ export function Header({ onMenuClick }: HeaderProps) {
         </div>
       </div>
 
-      {/* Gold accent line at bottom */}
       <div
         className="absolute bottom-0 left-0 right-0 h-px"
         style={{ background: 'linear-gradient(to right, transparent, rgba(212,175,55,0.2), transparent)' }}

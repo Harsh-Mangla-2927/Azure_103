@@ -8,8 +8,8 @@ interface AuthContextType {
   isAuthenticated: boolean;
   onboardingCompleted: boolean;
   loading: boolean;
-  login: (email: string, password: string) => Promise<void>;
-  register: (data: { email: string; password: string; confirmPassword: string; fullName: string; university?: string }) => Promise<void>;
+  /** Called by Login/Register pages after receiving JWT from verifyOtp */
+  setAuth: (data: { user: User; isAuthenticated: boolean; onboardingCompleted?: boolean }) => void;
   logout: () => void;
   completeOnboarding: () => void;
 }
@@ -17,9 +17,11 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(getUser());
-  const [onboardingCompleted, setOnboarding] = useState(getOnboardingCompleted());
-  const [loading, setLoading] = useState(!!getToken());
+  // Always start unauthenticated — validate against /auth/me before trusting any cached state
+  const [user, setUser]                      = useState<User | null>(null);
+  const [onboardingCompleted, setOnboarding] = useState(false);
+  // loading=true until /auth/me resolves (or no token exists)
+  const [loading, setLoading]                = useState(true);
 
   useEffect(() => {
     const token = getToken();
@@ -27,32 +29,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setLoading(false);
       return;
     }
-    // Verify token is still valid
+
     api.auth.me()
       .then((data) => {
-        setUser(data.user);
+        setUser(data.user as User);
         setOnboarding(data.onboardingCompleted);
-        saveAuth(token, data.user, data.onboardingCompleted);
+        saveAuth(token, data.user as User, data.onboardingCompleted);
       })
       .catch(() => {
+        // Token invalid or expired — clear everything
         clearAuth();
         setUser(null);
+        setOnboarding(false);
       })
       .finally(() => setLoading(false));
   }, []);
 
-  const login = useCallback(async (email: string, password: string) => {
-    const data = await api.auth.login({ email, password });
-    saveAuth(data.token, data.user, data.onboardingCompleted);
-    setUser(data.user);
-    setOnboarding(data.onboardingCompleted);
-  }, []);
-
-  const register = useCallback(async (payload: { email: string; password: string; confirmPassword: string; fullName: string; university?: string }) => {
-    const data = await api.auth.register(payload);
-    saveAuth(data.token, data.user, false);
-    setUser(data.user);
-    setOnboarding(false);
+  /** Called by Login/Register pages after successful verifyOtp */
+  const setAuth = useCallback(({ user: u, onboardingCompleted: oc }: { user: User; isAuthenticated: boolean; onboardingCompleted?: boolean }) => {
+    const token = localStorage.getItem('cp_token') || '';
+    const completed = oc ?? false;
+    setUser(u);
+    setOnboarding(completed);
+    saveAuth(token, u, completed);
   }, []);
 
   const logout = useCallback(() => {
@@ -68,7 +67,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, isAuthenticated: !!user, onboardingCompleted, loading, login, register, logout, completeOnboarding }}>
+    <AuthContext.Provider value={{ user, isAuthenticated: !!user, onboardingCompleted, loading, setAuth, logout, completeOnboarding }}>
       {children}
     </AuthContext.Provider>
   );

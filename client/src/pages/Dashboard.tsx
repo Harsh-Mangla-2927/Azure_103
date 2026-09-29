@@ -56,7 +56,7 @@ export default function Dashboard() {
 
   return (
     <div className="p-4 md:p-6 space-y-5 animate-fade-in">
-      {/* Header */}
+      
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
           <div className="label-deco mb-1">{getGreeting()}</div>
@@ -77,7 +77,6 @@ export default function Dashboard() {
 
       <SectionDivider />
 
-      {/* Metrics */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <MetricCard
           label="Profile Complete"
@@ -106,11 +105,10 @@ export default function Dashboard() {
         />
       </div>
 
-      {/* Two-column layout */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        {/* Left: Placement snapshot */}
+        
         <div className="lg:col-span-2 space-y-4">
-          {/* Snapshot */}
+          
           <div className="deco-card deco-corners p-4">
             <div className="label-deco mb-3">Placement Snapshot</div>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
@@ -129,7 +127,6 @@ export default function Dashboard() {
               ))}
             </div>
 
-            {/* Profile completion bar */}
             <div className="mt-4">
               <div className="flex justify-between items-center mb-1">
                 <span className="label-deco">Profile Completion</span>
@@ -150,7 +147,6 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* Quick Actions */}
           <div className="deco-card p-4">
             <div className="label-deco mb-3">Quick Actions</div>
             <div className="grid grid-cols-2 gap-2">
@@ -173,9 +169,8 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Right column */}
         <div className="space-y-4">
-          {/* AI Insight placeholder / prompt */}
+          
           <div className="deco-card deco-corners p-4">
             <div className="label-deco mb-2">AI Insight</div>
             <div className="gold-line mb-3" />
@@ -203,7 +198,6 @@ export default function Dashboard() {
             )}
           </div>
 
-          {/* Recent Activity */}
           <div className="deco-card p-4">
             <div className="label-deco mb-3">Recent Activity</div>
             {recentActivity.length === 0 ? (
