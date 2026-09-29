@@ -59,6 +59,29 @@ body {
   background-color: var(--background);
 }
 
+/* ── Auth split-panel layout ── */
+.auth-left-panel {
+  display: none;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 42%;
+  padding: 48px;
+  border-right: 1px solid #1A1A1A;
+  position: relative;
+  overflow: hidden;
+}
+.auth-mobile-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+@media (min-width: 1024px) {
+  .auth-left-panel { display: flex; }
+  .auth-mobile-logo { display: none; }
+}
+
 .deco-bg::before {
   content: '';
   position: fixed;

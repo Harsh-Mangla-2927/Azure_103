@@ -12,26 +12,22 @@ interface ProjectEntry { name: string; description: string; technologies: string
 interface CertEntry { name: string; issuer: string; year: string }
 
 export default function Onboarding() {
-  const { user, completeOnboarding } = useAuth();
+  const { user, completeOnboarding, logout } = useAuth();
   const navigate = useNavigate();
 
   const [step, setStep] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  // Step 0: Academic
   const [academic, setAcademic] = useState({
     university: '', degree: '', branch: '', graduationYear: '', cgpa: '', backlogs: '0',
   });
 
-  // Step 1: Skills
   const [skills, setSkills] = useState<SkillEntry[]>([{ name: '', category: 'Programming Languages' }]);
 
-  // Step 2: Projects & Certs
   const [projects, setProjects] = useState<ProjectEntry[]>([{ name: '', description: '', technologies: '' }]);
   const [certs, setCerts] = useState<CertEntry[]>([{ name: '', issuer: '', year: '' }]);
 
-  // Step 3: Career
   const [career, setCareer] = useState({ preferredRole: '', targetCompany: '' });
 
   const addSkill = () => setSkills(s => [...s, { name: '', category: 'Other' }]);
@@ -86,7 +82,7 @@ export default function Onboarding() {
 
   return (
     <div className="deco-bg min-h-screen flex flex-col">
-      {/* Header */}
+      
       <div className="border-b border-[#1A1A1A] px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <div className="w-5 h-5 border border-gold flex items-center justify-center flex-shrink-0" style={{ transform: 'rotate(45deg)' }}>
@@ -100,15 +96,14 @@ export default function Onboarding() {
         </div>
       </div>
 
-      {/* Progress stepper */}
       <div className="px-6 pt-5 pb-2">
         <div className="max-w-2xl mx-auto">
           <div className="flex items-center">
             {stepDots.map((dot, i) => (
               <React.Fragment key={i}>
-                {/* Step node */}
+                
                 <div className="flex flex-col items-center gap-1 flex-shrink-0">
-                  {/* Circle indicator */}
+                  
                   <div
                     className={`w-8 h-8 rounded-full border-2 flex items-center justify-center transition-all duration-300 text-[11px] font-heading ${
                       dot.state === 'done'
@@ -124,7 +119,7 @@ export default function Onboarding() {
                       <span>{['I', 'II', 'III', 'IV'][i]}</span>
                     )}
                   </div>
-                  {/* Label */}
+                  
                   <span
                     className={`text-[9px] font-body tracking-wider uppercase whitespace-nowrap hidden sm:block ${
                       dot.state === 'active' ? 'text-gold' : 'text-muted'
@@ -134,7 +129,6 @@ export default function Onboarding() {
                   </span>
                 </div>
 
-                {/* Connector line */}
                 {i < STEPS.length - 1 && (
                   <div
                     className="flex-1 h-px mx-2 mb-4 transition-all duration-500"
@@ -147,7 +141,6 @@ export default function Onboarding() {
         </div>
       </div>
 
-      {/* Main content */}
       <div className="flex-1 flex items-start justify-center px-4 py-4">
         <div className="w-full max-w-2xl" key={step}>
           <div className="deco-card deco-corners p-6">
@@ -164,7 +157,6 @@ export default function Onboarding() {
               </div>
             )}
 
-            {/* ── Step 0: Academic ── */}
             {step === 0 && (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {[
@@ -188,7 +180,6 @@ export default function Onboarding() {
               </div>
             )}
 
-            {/* ── Step 1: Skills ── */}
             {step === 1 && (
               <div className="space-y-3">
                 <p className="text-muted text-xs mb-3">
@@ -228,10 +219,9 @@ export default function Onboarding() {
               </div>
             )}
 
-            {/* ── Step 2: Projects & Certs ── */}
             {step === 2 && (
               <div className="space-y-5">
-                {/* Projects */}
+                
                 <div>
                   <div className="label-deco mb-3">Projects</div>
                   <div className="space-y-3">
@@ -278,7 +268,6 @@ export default function Onboarding() {
 
                 <div className="gold-line" />
 
-                {/* Certifications */}
                 <div>
                   <div className="label-deco mb-3">Certifications</div>
                   <div className="space-y-2">
@@ -323,7 +312,6 @@ export default function Onboarding() {
               </div>
             )}
 
-            {/* ── Step 3: Career ── */}
             {step === 3 && (
               <div className="space-y-4">
                 <div>
@@ -356,12 +344,21 @@ export default function Onboarding() {
               </div>
             )}
 
-            {/* Navigation */}
             <div className="flex items-center justify-between mt-6 pt-4 border-t border-[#2A2A2A]">
               <button
-                onClick={() => setStep(s => s - 1)}
-                disabled={step === 0}
-                className="btn-ghost !text-xs !py-2 disabled:opacity-30"
+                onClick={() => {
+                  if (step === 0) {
+                    // Step I: Log out and go to landing page.
+                    // Can't navigate to /dashboard or /login while authenticated
+                    // with incomplete onboarding — ProtectedRoute/PublicRoute would
+                    // redirect straight back to /onboarding (infinite loop).
+                    logout();
+                    navigate('/', { replace: true });
+                  } else {
+                    setStep(s => s - 1);
+                  }
+                }}
+                className="btn-ghost !text-xs !py-2"
               >
                 <ChevronLeft size={12} /> Back
               </button>
