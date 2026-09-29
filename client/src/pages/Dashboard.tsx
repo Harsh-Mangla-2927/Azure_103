@@ -7,7 +7,6 @@ import { MetricCard } from '../components/ui/MetricCard';
 import { LoadingState } from '../components/ui/LoadingState';
 import { StatusBadge } from '../components/ui/StatusBadge';
 import { SectionDivider } from '../components/ui/SectionDivider';
-import { PhoneVerificationCard } from '../components/PhoneVerificationCard';
 
 
 function getGreeting() {
@@ -79,18 +78,6 @@ export default function Dashboard() {
 
       <SectionDivider />
 
-      {/* Phone Verification — always visible; banner only when not yet verified */}
-      <PhoneVerificationCard
-        initialPhone={data?.user?.phoneNumber}
-        isVerified={data?.user?.phoneVerified ?? false}
-        compact
-        onVerificationSuccess={(masked) => {
-          setData((prev: any) => ({
-            ...prev,
-            user: { ...prev?.user, phoneVerified: true, phoneNumber: masked },
-          }));
-        }}
-      />
 
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">

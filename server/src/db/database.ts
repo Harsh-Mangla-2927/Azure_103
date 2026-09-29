@@ -157,17 +157,6 @@ function migrateSchema(db: Database.Database): void {
     { table: 'users', col: 'personal_otp_hash',         def: 'TEXT' },
     { table: 'users', col: 'personal_otp_expires_at',   def: 'TEXT' },
     { table: 'users', col: 'personal_otp_attempts',     def: 'INTEGER DEFAULT 0' },
-    { table: 'users', col: 'personal_otp_last_sent_at', def: 'TEXT' },
-    // ── Phone OTP fields (nullable — existing users unaffected) ──────────────
-    { table: 'users', col: 'phone_number',              def: 'TEXT' },
-    { table: 'users', col: 'phone_verified',            def: 'INTEGER DEFAULT 0' },
-    { table: 'users', col: 'phone_verified_at',         def: 'TEXT' },
-    { table: 'users', col: 'phone_otp_hash',            def: 'TEXT' },
-    { table: 'users', col: 'phone_otp_expires_at',      def: 'TEXT' },
-    { table: 'users', col: 'phone_otp_attempts',        def: 'INTEGER DEFAULT 0' },
-    { table: 'users', col: 'phone_otp_last_sent_at',    def: 'TEXT' },
-    { table: 'users', col: 'phone_otp_send_count',      def: 'INTEGER DEFAULT 0' },
-    { table: 'users', col: 'phone_otp_send_window_start', def: 'TEXT' },
   ];
 
   for (const { table, col, def } of columns) {

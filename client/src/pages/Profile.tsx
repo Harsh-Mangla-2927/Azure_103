@@ -4,7 +4,6 @@ import { useProfile } from '../hooks/useProfile';
 import { LoadingState } from '../components/ui/LoadingState';
 import { SectionDivider } from '../components/ui/SectionDivider';
 import { DecoButton } from '../components/ui/DecoButton';
-import { PhoneVerificationCard } from '../components/PhoneVerificationCard';
 
 const SKILL_CATEGORIES = ['Programming Languages', 'Frameworks', 'AI/ML', 'Databases', 'Cloud', 'Other'];
 
@@ -139,11 +138,6 @@ export default function Profile() {
             </div>
           </div>
 
-          <PhoneVerificationCard
-            initialPhone={user?.phoneNumber}
-            isVerified={user?.phoneVerified}
-            onVerificationSuccess={() => reload()}
-          />
         </div>
 
 

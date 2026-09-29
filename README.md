@@ -16,7 +16,7 @@ An enterprise-ready, AI-driven placement preparation ecosystem designed to evalu
 
 ### 1. 🛡️ Institutional Authentication & Multi-Channel Verification
 - **Educational Domain Enforcement:** Whitelist-based domain verification ensuring only eligible university students access placement pools.
-- **Two-Factor OTP Security:** Multi-channel OTP verification delivered via **Nodemailer SMTP** (email) or **Fast2SMS / Twilio** (SMS).
+- **Two-Factor OTP Security:** Email-based OTP verification via **Nodemailer SMTP** with hashed delivery, 5-minute expiry, and anti-brute-force rate limiting.
 - **Hardened Security Architecture:** Password hashing via `bcryptjs` (12 salt rounds), hashed OTP verification, 5-minute expiry windows, anti-brute-force rate limiting, and 7-day signed JWT tokens.
 
 ### 2. 🤖 Azure AI Foundry Agent Orchestration
@@ -121,8 +121,7 @@ NEW_AZURE_WEB_AGENT/
 │   │   ├── services/
 │   │   │   ├── azureAgent.ts             # Azure AI Foundry agent orchestration
 │   │   │   ├── emailService.ts           # SMTP email dispatcher & HTML templates
-│   │   │   ├── resumeExtractor.ts        # PDF & DOCX text parsing engine
-│   │   │   └── smsService.ts             # Fast2SMS phone normalization & dispatch
+│   │   │   └── resumeExtractor.ts        # PDF & DOCX text parsing engine
 │   │   └── index.ts                      # Server bootstrap & middleware chain
 │   └── tsconfig.json
 │
@@ -156,7 +155,6 @@ Key environment configurations:
 - **Azure AI:** `AZURE_AI_ENDPOINT`, `AZURE_AI_KEY`, `AZURE_AGENT_ID`
 - **Authentication:** `JWT_SECRET` (generate using `openssl rand -hex 32`)
 - **Email (SMTP):** `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD`
-- **SMS (Optional):** `FAST2SMS_API_KEY` (or Twilio credentials)
 
 ### 3. Run Development Servers
 Start both the client (Vite) and server (Express) concurrently:
