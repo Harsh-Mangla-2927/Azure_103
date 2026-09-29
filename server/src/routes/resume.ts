@@ -8,7 +8,6 @@ import { extractTextFromResume } from '../services/resumeExtractor';
 
 const router = Router();
 
-// POST /api/resume/upload
 router.post(
   '/upload',
   authenticateToken,
@@ -28,7 +27,7 @@ router.post(
       const userId = req.userId!;
 
       try {
-        // Extract text from the resume
+        
         let extractedText: string | null = null;
         let extractionError: string | null = null;
 
@@ -42,7 +41,6 @@ router.post(
 
         const db = getDatabase();
 
-        // Delete old resumes (keep only latest)
         const oldResumes = db.prepare('SELECT filename FROM resumes WHERE user_id = ?').all(userId) as any[];
         const UPLOAD_DIR = process.env.UPLOAD_DIR || './uploads';
         for (const old of oldResumes) {
@@ -53,7 +51,6 @@ router.post(
         }
         db.prepare('DELETE FROM resumes WHERE user_id = ?').run(userId);
 
-        // Insert new resume
         const result = db.prepare(`
           INSERT INTO resumes (user_id, filename, original_name, file_type, file_size, extracted_text)
           VALUES (?, ?, ?, ?, ?, ?)
@@ -74,7 +71,7 @@ router.post(
         });
       } catch (error) {
         console.error('Resume upload error:', error);
-        // Clean up file on error
+        
         if (fs.existsSync(file.path)) {
           try { fs.unlinkSync(file.path); } catch {}
         }
@@ -84,7 +81,6 @@ router.post(
   }
 );
 
-// GET /api/resume
 router.get('/', authenticateToken, (req: AuthenticatedRequest, res: Response): void => {
   try {
     const db = getDatabase();
@@ -106,7 +102,6 @@ router.get('/', authenticateToken, (req: AuthenticatedRequest, res: Response): v
   }
 });
 
-// DELETE /api/resume/:id
 router.delete('/:id', authenticateToken, (req: AuthenticatedRequest, res: Response): void => {
   try {
     const db = getDatabase();

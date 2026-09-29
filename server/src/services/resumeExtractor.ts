@@ -34,7 +34,7 @@ export async function extractTextFromResume(filePath: string, fileType: string):
 }
 
 async function extractFromPDF(filePath: string): Promise<string> {
-  // Dynamic import to handle pdf-parse
+  
   const pdfParse = require('pdf-parse');
   const dataBuffer = fs.readFileSync(filePath);
   const data = await pdfParse(dataBuffer);

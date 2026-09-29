@@ -42,7 +42,6 @@ const fileFilter = (
   }
 };
 
-// multer 2.x: call as function directly
 const multer = (multerPkg as any).default || multerPkg;
 
 export const uploadMiddleware = multer({

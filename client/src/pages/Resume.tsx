@@ -41,7 +41,6 @@ export default function Resume() {
   const handleUpload = async (file: File) => {
     if (!file) return;
 
-    // Validate
     const allowedTypes = ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
     const allowedExts = ['.pdf', '.docx', '.doc'];
     const ext = file.name.substring(file.name.lastIndexOf('.')).toLowerCase();
@@ -107,7 +106,7 @@ export default function Resume() {
       )}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {/* Upload area */}
+        
         <div className="deco-card deco-corners p-4">
           <div className="label-deco mb-4">Upload Resume</div>
 
@@ -174,7 +173,6 @@ export default function Resume() {
           )}
         </div>
 
-        {/* Resume info */}
         <div className="deco-card deco-corners p-4">
           <div className="label-deco mb-4">Resume Profile</div>
 
@@ -235,7 +233,6 @@ export default function Resume() {
         </div>
       </div>
 
-      {/* Use for analysis note */}
       {currentResume?.extractedText && (
         <div className="deco-card p-4">
           <div className="flex items-center gap-3">
