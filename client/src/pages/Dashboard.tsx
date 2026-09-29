@@ -7,6 +7,8 @@ import { MetricCard } from '../components/ui/MetricCard';
 import { LoadingState } from '../components/ui/LoadingState';
 import { StatusBadge } from '../components/ui/StatusBadge';
 import { SectionDivider } from '../components/ui/SectionDivider';
+import { PhoneVerificationCard } from '../components/PhoneVerificationCard';
+
 
 function getGreeting() {
   const hour = new Date().getHours();
@@ -76,6 +78,21 @@ export default function Dashboard() {
       </div>
 
       <SectionDivider />
+
+      {!data?.user?.phoneVerified && (
+        <PhoneVerificationCard
+          initialPhone={data?.user?.phoneNumber}
+          isVerified={false}
+          compact
+          onVerificationSuccess={(masked) => {
+            setData((prev: any) => ({
+              ...prev,
+              user: { ...prev?.user, phoneVerified: true, phoneNumber: masked },
+            }));
+          }}
+        />
+      )}
+
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <MetricCard

@@ -3,7 +3,7 @@ import { api } from '../lib/api';
 import { Profile, Skill, Project, Certification } from '../types';
 
 interface ProfileState {
-  user: { fullName: string; email: string } | null;
+  user: { fullName: string; email: string; phoneNumber?: string | null; phoneVerified?: boolean } | null;
   profile: Profile;
   skills: Skill[];
   projects: Project[];
@@ -28,7 +28,12 @@ export function useProfile() {
     try {
       const data = await api.profile.get();
       setState({
-        user: { fullName: data.user.fullName, email: data.user.email },
+        user: {
+          fullName: data.user.fullName,
+          email: data.user.email,
+          phoneNumber: data.user.phoneNumber,
+          phoneVerified: data.user.phoneVerified,
+        },
         profile: data.profile || {},
         skills: data.skills || [],
         projects: data.projects || [],

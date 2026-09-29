@@ -789,7 +789,7 @@ router.get('/me', authenticateToken, (req: AuthenticatedRequest, res: Response):
   try {
     const db   = getDatabase();
     const user = db.prepare(
-      'SELECT id, email, full_name, personal_email, personal_email_verified FROM users WHERE id = ?'
+      'SELECT id, email, full_name, personal_email, personal_email_verified, phone_number, phone_verified FROM users WHERE id = ?'
     ).get(req.userId) as any;
 
     if (!user) { res.status(404).json({ error: 'User not found' }); return; }
@@ -809,9 +809,12 @@ router.get('/me', authenticateToken, (req: AuthenticatedRequest, res: Response):
         fullName: user.full_name,
         personalEmail: user.personal_email || null,
         personalEmailVerified: user.personal_email_verified === 1,
+        phoneNumber: user.phone_number || null,
+        phoneVerified: user.phone_verified === 1,
       },
       onboardingCompleted: profile?.onboarding_completed === 1,
     });
+
   } catch (error) {
     console.error('Get me error:', error);
     res.status(500).json({ error: 'Failed to get user info' });

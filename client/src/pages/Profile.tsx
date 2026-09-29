@@ -4,11 +4,12 @@ import { useProfile } from '../hooks/useProfile';
 import { LoadingState } from '../components/ui/LoadingState';
 import { SectionDivider } from '../components/ui/SectionDivider';
 import { DecoButton } from '../components/ui/DecoButton';
+import { PhoneVerificationCard } from '../components/PhoneVerificationCard';
 
 const SKILL_CATEGORIES = ['Programming Languages', 'Frameworks', 'AI/ML', 'Databases', 'Cloud', 'Other'];
 
 export default function Profile() {
-  const { user, profile, skills, projects, certifications, loading, error, save } = useProfile();
+  const { user, profile, skills, projects, certifications, loading, error, save, reload } = useProfile();
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState('');
   const [saveOk, setSaveOk] = useState(false);
@@ -102,40 +103,49 @@ export default function Profile() {
 
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
         
-        <div className="deco-card deco-corners p-4">
-          <div className="flex items-center gap-2 mb-4">
-            <div className="diamond-icon-sm text-gold"><Book size={12} /></div>
-            <div className="label-deco">Academic Information</div>
+        <div className="space-y-4">
+          <div className="deco-card deco-corners p-4">
+            <div className="flex items-center gap-2 mb-4">
+              <div className="diamond-icon-sm text-gold"><Book size={12} /></div>
+              <div className="label-deco">Academic Information</div>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {[
+                { label: 'Full Name', field: 'fullName', isUser: true, placeholder: 'Your full name' },
+                { label: 'University', field: 'university', placeholder: 'Institution name' },
+                { label: 'Degree', field: 'degree', placeholder: 'e.g. B.Tech' },
+                { label: 'Branch', field: 'branch', placeholder: 'e.g. Computer Science' },
+                { label: 'Graduation Year', field: 'graduation_year', placeholder: 'e.g. 2025', type: 'number' },
+                { label: 'CGPA', field: 'cgpa', placeholder: 'e.g. 8.5', type: 'number' },
+                { label: 'Active Backlogs', field: 'backlogs', placeholder: '0', type: 'number' },
+              ].map(({ label, field, isUser, placeholder, type }) => (
+                <div key={field}>
+                  <label className="input-label">{label}</label>
+                  <input
+                    type={type || 'text'}
+                    className="input-deco"
+                    placeholder={placeholder}
+                    value={isUser ? fullName : (localProfile[field as keyof typeof localProfile] as any) ?? ''}
+                    onChange={e => {
+                      if (isUser) setFullName(e.target.value);
+                      else setLocalProfile(p => ({
+                        ...p,
+                        [field]: type === 'number' ? (e.target.value === '' ? undefined : Number(e.target.value)) : e.target.value
+                      }));
+                    }}
+                  />
+                </div>
+              ))}
+            </div>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            {[
-              { label: 'Full Name', field: 'fullName', isUser: true, placeholder: 'Your full name' },
-              { label: 'University', field: 'university', placeholder: 'Institution name' },
-              { label: 'Degree', field: 'degree', placeholder: 'e.g. B.Tech' },
-              { label: 'Branch', field: 'branch', placeholder: 'e.g. Computer Science' },
-              { label: 'Graduation Year', field: 'graduation_year', placeholder: 'e.g. 2025', type: 'number' },
-              { label: 'CGPA', field: 'cgpa', placeholder: 'e.g. 8.5', type: 'number' },
-              { label: 'Active Backlogs', field: 'backlogs', placeholder: '0', type: 'number' },
-            ].map(({ label, field, isUser, placeholder, type }) => (
-              <div key={field}>
-                <label className="input-label">{label}</label>
-                <input
-                  type={type || 'text'}
-                  className="input-deco"
-                  placeholder={placeholder}
-                  value={isUser ? fullName : (localProfile[field as keyof typeof localProfile] as any) ?? ''}
-                  onChange={e => {
-                    if (isUser) setFullName(e.target.value);
-                    else setLocalProfile(p => ({
-                      ...p,
-                      [field]: type === 'number' ? (e.target.value === '' ? undefined : Number(e.target.value)) : e.target.value
-                    }));
-                  }}
-                />
-              </div>
-            ))}
-          </div>
+
+          <PhoneVerificationCard
+            initialPhone={user?.phoneNumber}
+            isVerified={user?.phoneVerified}
+            onVerificationSuccess={() => reload()}
+          />
         </div>
+
 
         <div className="deco-card deco-corners p-4">
           <div className="flex items-center gap-2 mb-4">

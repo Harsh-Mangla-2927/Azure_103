@@ -9,7 +9,7 @@ router.get('/', authenticateToken, (req: AuthenticatedRequest, res: Response): v
     const db = getDatabase();
     const userId = req.userId!;
 
-    const user = db.prepare('SELECT full_name, email FROM users WHERE id = ?').get(userId) as any;
+    const user = db.prepare('SELECT full_name, email, phone_number, phone_verified FROM users WHERE id = ?').get(userId) as any;
     const profile = db.prepare('SELECT * FROM profiles WHERE user_id = ?').get(userId) as any;
     const skills = db.prepare('SELECT COUNT(*) as count FROM skills WHERE user_id = ?').get(userId) as any;
     const projects = db.prepare('SELECT COUNT(*) as count FROM projects WHERE user_id = ?').get(userId) as any;
@@ -48,8 +48,14 @@ router.get('/', authenticateToken, (req: AuthenticatedRequest, res: Response): v
     }
 
     res.json({
-      user: { fullName: user?.full_name, email: user?.email },
+      user: {
+        fullName: user?.full_name,
+        email: user?.email,
+        phoneNumber: user?.phone_number || null,
+        phoneVerified: user?.phone_verified === 1,
+      },
       profile,
+
       metrics: {
         profileCompletion: completionScore,
         skillsCount: skills.count,
